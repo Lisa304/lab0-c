@@ -14,40 +14,90 @@
 /* Create an empty queue */
 struct list_head *q_new()
 {
-    return NULL;
+    struct list_head *new = malloc(sizeof(struct list_head));
+    if (!new) {
+        free(new);
+        return NULL;
+    }
+    INIT_LIST_HEAD(new);
+    return new;
 }
 
 /* Free all storage used by queue */
-void q_free(struct list_head *head) {}
+void q_free(struct list_head *head)
+{
+    if (!head) {
+        return;
+    }
+    element_t *entry, *safe;
+    list_for_each_entry_safe (entry, safe, head, list)
+        q_release_element(entry);
+    free(head);
+}
 
 /* Insert an element at head of queue */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    if (!head) {
+        return false;
+    }
+    element_t *node = malloc(sizeof(element_t));
+    if (!node) {
+        return false;
+    }
+    node->value = strdup(s);
+    if (!node->value) {
+        free(node);
+        return false;
+    }
+    list_add(&node->list, head);
     return true;
 }
 
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
-    return true;
+    if (!head) {
+        return false;
+    }
+    return q_insert_head(head->prev, s);
 }
 
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head || list_empty(head))
+        return NULL;
+    element_t *first = list_first_entry(head, element_t, list);
+    list_del(&first->list);
+    if (sp) {
+        for (char *i = first->value; bufsize > 1 && *i; sp++, i++, bufsize--)
+            *sp = *i;
+        *sp = '\0';
+    }
+    return first;
 }
 
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head || list_empty(head))
+        return NULL;
+    return q_remove_head(head->prev->prev, sp, bufsize);
 }
 
 /* Return number of elements in queue */
 int q_size(struct list_head *head)
 {
-    return -1;
+    if (!head)
+        return 0;
+
+    int len = 0;
+    struct list_head *li;
+
+    list_for_each (li, head)
+        len++;
+    return len;
 }
 
 /* Delete the middle node in queue */
@@ -105,3 +155,11 @@ int q_merge(struct list_head *head, bool descend)
     // https://leetcode.com/problems/merge-k-sorted-lists/
     return 0;
 }
+
+// int main(){
+//     struct list_head *tmp = q_new();
+//     char *name = "Lisa";
+//     q_insert_head(tmp, name);
+//     printf("hello world!");
+//     return 0;
+// }
