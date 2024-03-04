@@ -117,12 +117,53 @@ bool q_delete_mid(struct list_head *head)
     return true;
 }
 
+void tra(struct list_head *head)
+{
+    struct list_head *tmp = head->next;
+    for (; tmp != head; tmp = tmp->next) {
+        printf("%s ", container_of(tmp, element_t, list)->value);
+    }
+    printf("\n============\n");
+}
+
+void delete_release(element_t *node)
+{
+    list_del(&node->list);
+    q_release_element(node);
+}
 /* Delete all nodes that have duplicate string */
 bool q_delete_dup(struct list_head *head)
 {
+    if (head == NULL || list_empty(head) || list_is_singular(head))
+        return false;
+    char *compare = NULL;
+    struct list_head *cur = head->next;
+    bool equal = false;
+    while (cur != head) {
+        element_t *curr_ele = container_of(cur, element_t, list);
+        if (compare && cur->next == head) {
+            if (equal)
+                delete_release(curr_ele);
+            return true;
+        }
+        compare = curr_ele->value;
+        element_t *next_ele = container_of(cur->next, element_t, list);
+        cur = cur->next;
+        if (strcmp(compare, next_ele->value) == 0) {
+            delete_release(curr_ele);
+            equal = true;
+        } else if (equal) {
+            delete_release(curr_ele);
+            equal = false;
+        } else {
+            compare = next_ele->value;
+            equal = false;
+        }
+    }
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
     return true;
 }
+
 
 /* Swap every two adjacent nodes */
 void q_swap(struct list_head *head)
