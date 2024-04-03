@@ -92,7 +92,7 @@ static void merge_final(struct list_head *head,
                         struct list_head *b)
 {
     if (!a || !b || a == b)  // 確保 a 和 b 都不是空指針
-        return 0;
+        return;
     struct list_head *tail = head;
 
     for (;;) {
