@@ -4,6 +4,6 @@ option malloc 0
 new
 ih RAND 50000
 time
-lsort
+timsort
 time
 free
